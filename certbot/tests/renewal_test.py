@@ -85,7 +85,7 @@ class RenewalTest(test_util.ConfigTestCase):
         renewal._restore_webroot_config(config, renewalparams)
         self.assertEqual(config.webroot_path, ['/var/www/'])
 
-    # Refactoring
+    # Refactoring renewal common
     def _test_renewal_common(self, due_for_renewal, extra_args, log_out=None,
                              args=None, should_renew=True, error_expected=False,
                              quiet_mode=False, expiry_date=datetime.datetime.now(),
