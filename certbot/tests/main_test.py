@@ -1059,23 +1059,6 @@ class MainTest(test_util.ConfigTestCase):  # pylint: disable=too-many-public-met
         self.assertTrue('fullchain.pem' in cert_msg)
         self.assertTrue('donate' in get_utility().add_message.call_args[0][0])
 
-    # Should be moved to renewal_test.py
-    @test_util.broken_on_windows
-    @mock.patch('certbot.crypto_util.notAfter')
-    def test_certonly_renewal_triggers(self, unused_notafter):
-        # --dry-run should force renewal
-        _, get_utility, _ = self._test_renewal_common(False, ['--dry-run', '--keep'],
-                                                      log_out="simulating renewal")
-        self.assertEqual(get_utility().add_message.call_count, 1)
-        self.assertTrue('dry run' in get_utility().add_message.call_args[0][0])
-
-        self._test_renewal_common(False, ['--renew-by-default', '-tvv', '--debug'],
-                                  log_out="Auto-renewal forced")
-        self.assertEqual(get_utility().add_message.call_count, 1)
-
-        self._test_renewal_common(False, ['-tvv', '--debug', '--keep'],
-                                  log_out="not yet due", should_renew=False)
-
     def _dump_log(self):
         print("Logs:")
         log_path = os.path.join(self.config.logs_dir, "letsencrypt.log")

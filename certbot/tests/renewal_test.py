@@ -161,6 +161,22 @@ class RenewalTest(test_util.ConfigTestCase):
 
         return mock_lineage, mock_get_utility, stdout
 
+    @test_util.broken_on_windows
+    @mock.patch('certbot.crypto_util.notAfter')
+    def test_certonly_renewal_triggers(self, unused_notafter):
+        # --dry-run should force renewal
+        _, get_utility, _ = self._test_renewal_common(False, ['--dry-run', '--keep'],
+                                                      log_out="simulating renewal")
+        self.assertEqual(get_utility().add_message.call_count, 1)
+        self.assertTrue('dry run' in get_utility().add_message.call_args[0][0])
+
+        self._test_renewal_common(False, ['--renew-by-default', '-tvv', '--debug'],
+                                  log_out="Auto-renewal forced")
+        self.assertEqual(get_utility().add_message.call_count, 1)
+
+        self._test_renewal_common(False, ['-tvv', '--debug', '--keep'],
+                                  log_out="not yet due", should_renew=False)
+
 
 class RestoreRequiredConfigElementsTest(test_util.ConfigTestCase):
     """Tests for certbot.renewal.restore_required_config_elements."""
