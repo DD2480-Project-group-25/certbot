@@ -15,10 +15,9 @@ from certbot import errors
 from certbot import storage
 from certbot import main
 
-
 import certbot.tests.util as test_util
-CSR = test_util.vector_path('csr_512.der')
 
+CSR = test_util.vector_path('csr_512.der')
 
 
 class RenewalTest(test_util.ConfigTestCase):
@@ -163,10 +162,11 @@ class RenewalTest(test_util.ConfigTestCase):
 
         return mock_lineage, mock_get_utility, stdout
 
-    # Should be moved to renewal_test.py
-    def test_renew_with_bad_cli_args(self):
+    def test_renew_bad_cli_args_with_split(self):
         self._test_renewal_common(True, None, args='renew -d example.com'.split(),
                                   should_renew=False, error_expected=True)
+
+    def test_renew_bad_cli_args_with_format(self):
         self._test_renewal_common(True, None, args='renew --csr {0}'.format(CSR).split(),
                                   should_renew=False, error_expected=True)
 
