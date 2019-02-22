@@ -161,6 +161,11 @@ class RenewalTest(test_util.ConfigTestCase):
 
         return mock_lineage, mock_get_utility, stdout
 
+    def test_renew_with_certname(self):
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        self._test_renewal_common(True, [], should_renew=True,
+                                  args=['renew', '--dry-run', '--cert-name', 'sample-renewal'])
+
 
 class RestoreRequiredConfigElementsTest(test_util.ConfigTestCase):
     """Tests for certbot.renewal.restore_required_config_elements."""
