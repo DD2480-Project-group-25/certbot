@@ -1177,12 +1177,6 @@ class MainTest(test_util.ConfigTestCase):  # pylint: disable=too-many-public-met
         self._test_renewal_common(False, [], args=args, should_renew=False, error_expected=True)
 
     # Should be moved to renewal_test.py
-    def test_renew_with_certname(self):
-        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
-        self._test_renewal_common(True, [], should_renew=True,
-            args=['renew', '--dry-run', '--cert-name', 'sample-renewal'])
-
-    # Should be moved to renewal_test.py
     def test_renew_with_bad_certname(self):
         self._test_renewal_common(True, [], should_renew=False,
             args=['renew', '--dry-run', '--cert-name', 'sample-renewal'],
