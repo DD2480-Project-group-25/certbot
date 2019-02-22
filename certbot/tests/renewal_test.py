@@ -241,6 +241,15 @@ class RenewalTest(test_util.ConfigTestCase):
         out = stdout.getvalue()
         self.assertTrue("renew" in out)
 
+    @test_util.broken_on_windows
+    def test_quiet_renew(self):
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        args = ["renew", "--dry-run", "-q"]
+        _, _, stdout = self._test_renewal_common(True, [], args=args,
+                                                 should_renew=True, quiet_mode=True)
+        out = stdout.getvalue()
+        self.assertEqual("", out)
+
 
 class RestoreRequiredConfigElementsTest(test_util.ConfigTestCase):
     """Tests for certbot.renewal.restore_required_config_elements."""
