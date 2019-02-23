@@ -173,7 +173,7 @@ class RenewalTest(test_util.ConfigTestCase):
         args = ["renew", "--dry-run", "--post-hook=no-such-command"]
         self._test_renewal_common(True, [], args=args, should_renew=False,
                                   error_expected=True)
-        
+
     def test_renew_bad_cli_args_with_split(self):
         self._test_renewal_common(True, None, args='renew -d example.com'.split(),
                                   should_renew=False, error_expected=True)
