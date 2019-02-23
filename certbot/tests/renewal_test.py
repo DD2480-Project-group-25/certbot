@@ -188,6 +188,17 @@ class RenewalTest(test_util.ConfigTestCase):
         self._test_renewal_common(True, None, args='renew --csr {0}'.format(CSR).split(),
                                   should_renew=False, error_expected=True)
 
+    @mock.patch('sys.stdin')
+    def test_noninteractive_renewal_delay(self, stdin):
+        stdin.isatty.return_value = False
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        args = ["renew", "--dry-run", "-tvv"]
+        self._test_renewal_common(True, [], args=args, should_renew=True)
+        self.assertEqual(self.mock_sleep.call_count, 1)
+        # in main.py:
+        #     sleep_time = random.randint(1, 60*8)
+        sleep_call_arg = self.mock_sleep.call_args[0][0]
+        self.assertTrue(1 <= sleep_call_arg <= 60*8)
 
 
 class RestoreRequiredConfigElementsTest(test_util.ConfigTestCase):
