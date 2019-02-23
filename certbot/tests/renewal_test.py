@@ -27,6 +27,8 @@ class RenewalTest(test_util.ConfigTestCase):
                               '--work-dir', self.config.work_dir,
                               '--logs-dir', self.config.logs_dir, '--text']
 
+        self.mock_sleep = mock.patch('time.sleep').start()
+
     def _dump_log(self):
         print("Logs:")
         log_path = os.path.join(self.config.logs_dir, "letsencrypt.log")
