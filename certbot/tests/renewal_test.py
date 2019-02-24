@@ -167,6 +167,18 @@ class RenewalTest(test_util.ConfigTestCase):
 
         return mock_lineage, mock_get_utility, stdout
 
+    def test_renew_verb(self):
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        args = ["renew", "--dry-run", "-tvv"]
+        self._test_renewal_common(True, [], args=args, should_renew=True)
+
+    @mock.patch('certbot.hooks.post_hook')
+    def test_renew_no_hook_validation(self, unused_post_hook):
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        args = ["renew", "--dry-run", "--post-hook=no-such-command",
+                "--disable-hook-validation"]
+        self._test_renewal_common(True, [], args=args, should_renew=True,
+                                      error_expected=False)
     @mock.patch('certbot.storage.RenewableCert.save_successor')
     def test_reuse_key_no_dry_run(self, unused_save_successor):
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
@@ -196,7 +208,6 @@ class RenewalTest(test_util.ConfigTestCase):
             pass  # leave the file empty
         args = ["renew", "--dry-run", "-tvv"]
         self._test_renewal_common(False, [], args=args, should_renew=False, error_expected=True)
-
 
 class RestoreRequiredConfigElementsTest(test_util.ConfigTestCase):
     """Tests for certbot.renewal.restore_required_config_elements."""
