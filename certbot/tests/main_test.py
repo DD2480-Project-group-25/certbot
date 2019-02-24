@@ -1084,21 +1084,6 @@ class MainTest(test_util.ConfigTestCase):  # pylint: disable=too-many-public-met
                 print(lf.read())
 
     # Should be moved to renewal_test.py
-    def test_renew_verb(self):
-        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
-        args = ["renew", "--dry-run", "-tvv"]
-        self._test_renewal_common(True, [], args=args, should_renew=True)
-
-    # Should be moved to renewal_test.py
-    @mock.patch('sys.stdin')
-    def test_interactive_no_renewal_delay(self, stdin):
-        stdin.isatty.return_value = True
-        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
-        args = ["renew", "--dry-run", "-tvv"]
-        self._test_renewal_common(True, [], args=args, should_renew=True)
-        self.assertEqual(self.mock_sleep.call_count, 0)
-
-    # Should be moved to renewal_test.py
     @mock.patch('certbot.renewal.should_renew')
     def test_renew_skips_recent_certs(self, should_renew):
         should_renew.return_value = False
@@ -1124,36 +1109,6 @@ class MainTest(test_util.ConfigTestCase):  # pylint: disable=too-many-public-met
         out = stdout.getvalue()
         self.assertEqual("", out)
 
-    # Should be moved to renewal_test.py
-    def test_renew_no_hook_validation(self):
-        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
-        args = ["renew", "--dry-run", "--post-hook=no-such-command",
-                "--disable-hook-validation"]
-        with mock.patch("certbot.hooks.post_hook"):
-            self._test_renewal_common(True, [], args=args, should_renew=True,
-                                      error_expected=False)
-
-    # Should be moved to renewal_test.py
-    def test_renew_verb_empty_config(self):
-        rd = os.path.join(self.config.config_dir, 'renewal')
-        if not os.path.exists(rd):
-            os.makedirs(rd)
-        with open(os.path.join(rd, 'empty.conf'), 'w'):
-            pass  # leave the file empty
-        args = ["renew", "--dry-run", "-tvv"]
-        self._test_renewal_common(False, [], args=args, should_renew=False, error_expected=True)
-
-    # Should be moved to renewal_test.py
-    def test_renew_with_certname(self):
-        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
-        self._test_renewal_common(True, [], should_renew=True,
-            args=['renew', '--dry-run', '--cert-name', 'sample-renewal'])
-
-    # Should be moved to renewal_test.py
-    def test_renew_with_bad_certname(self):
-        self._test_renewal_common(True, [], should_renew=False,
-            args=['renew', '--dry-run', '--cert-name', 'sample-renewal'],
-            error_expected=True)
 
     def _make_dummy_renewal_config(self):
         renewer_configs_dir = os.path.join(self.config.config_dir, 'renewal')

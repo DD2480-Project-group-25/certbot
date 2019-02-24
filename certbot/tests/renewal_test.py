@@ -169,6 +169,29 @@ class RenewalTest(test_util.ConfigTestCase):
 
         return mock_lineage, mock_get_utility, stdout
 
+    def test_renew_with_bad_certname(self):
+        self._test_renewal_common(True, [], should_renew=False,
+                                  args=['renew', '--dry-run', '--cert-name', 'sample-renewal'],
+                                  error_expected=True)
+
+    def test_renew_with_certname(self):
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        self._test_renewal_common(True, [], should_renew=True,
+                                  args=['renew', '--dry-run', '--cert-name', 'sample-renewal'])
+
+    def test_renew_verb(self):
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        args = ["renew", "--dry-run", "-tvv"]
+        self._test_renewal_common(True, [], args=args, should_renew=True)
+
+    @mock.patch('certbot.hooks.post_hook')
+    def test_renew_no_hook_validation(self, unused_post_hook):
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        args = ["renew", "--dry-run", "--post-hook=no-such-command",
+                "--disable-hook-validation"]
+        self._test_renewal_common(True, [], args=args, should_renew=True,
+                                      error_expected=False)
+
     @mock.patch('certbot.storage.RenewableCert.save_successor')
     def test_reuse_key_no_dry_run(self, unused_save_successor):
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
@@ -201,6 +224,13 @@ class RenewalTest(test_util.ConfigTestCase):
         #     sleep_time = random.randint(1, 60*8)
         sleep_call_arg = self.mock_sleep.call_args[0][0]
         self.assertTrue(1 <= sleep_call_arg <= 60*8)
+
+    def test_interactive_no_renewal_delay(self, stdin):
+        stdin.isatty.return_value = True
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        args = ["renew", "--dry-run", "-tvv"]
+        self._test_renewal_common(True, [], args=args, should_renew=True)
+        self.assertEqual(self.mock_sleep.call_count, 0)
 
 
 class RestoreRequiredConfigElementsTest(test_util.ConfigTestCase):
