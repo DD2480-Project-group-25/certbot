@@ -15,8 +15,9 @@ from certbot import errors
 from certbot import storage
 from certbot import main
 
-
 import certbot.tests.util as test_util
+
+CSR = test_util.vector_path('csr_512.der')
 
 
 class RenewalTest(test_util.ConfigTestCase):
@@ -32,6 +33,11 @@ class RenewalTest(test_util.ConfigTestCase):
         if os.path.exists(log_path):
             with open(log_path) as lf:
                 print(lf.read())
+
+    def test_reuse_key(self):
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        args = ["renew", "--dry-run", "--reuse-key"]
+        self._test_renewal_common(True, [], args=args, should_renew=True, reuse_key=True)
 
     def _call(self, args, stdout=None, mockisfile=False):
         """Run the cli with output streams, actual client and optionally
@@ -168,6 +174,27 @@ class RenewalTest(test_util.ConfigTestCase):
                 "--disable-hook-validation"]
         self._test_renewal_common(True, [], args=args, should_renew=True,
                                       error_expected=False)
+    @mock.patch('certbot.storage.RenewableCert.save_successor')
+    def test_reuse_key_no_dry_run(self, unused_save_successor):
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        args = ["renew", "--reuse-key"]
+        self._test_renewal_common(True, [], args=args, should_renew=True, reuse_key=True)
+
+
+    def test_renew_hook_validation(self):
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        args = ["renew", "--dry-run", "--post-hook=no-such-command"]
+        self._test_renewal_common(True, [], args=args, should_renew=False,
+                                  error_expected=True)
+
+    def test_renew_bad_cli_args_with_split(self):
+        self._test_renewal_common(True, None, args='renew -d example.com'.split(),
+                                  should_renew=False, error_expected=True)
+
+    def test_renew_bad_cli_args_with_format(self):
+        self._test_renewal_common(True, None, args='renew --csr {0}'.format(CSR).split(),
+                                  should_renew=False, error_expected=True)
+
 
 class RestoreRequiredConfigElementsTest(test_util.ConfigTestCase):
     """Tests for certbot.renewal.restore_required_config_elements."""

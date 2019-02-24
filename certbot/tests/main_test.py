@@ -1089,18 +1089,6 @@ class MainTest(test_util.ConfigTestCase):  # pylint: disable=too-many-public-met
         args = ["renew", "--dry-run", "-tvv"]
         self._test_renewal_common(True, [], args=args, should_renew=True)
 
-    # Should be moved to renewal_test.py
-    def test_reuse_key(self):
-        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
-        args = ["renew", "--dry-run", "--reuse-key"]
-        self._test_renewal_common(True, [], args=args, should_renew=True, reuse_key=True)
-
-    # Should be moved to renewal_test.py
-    @mock.patch('certbot.storage.RenewableCert.save_successor')
-    def test_reuse_key_no_dry_run(self, unused_save_successor):
-        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
-        args = ["renew", "--reuse-key"]
-        self._test_renewal_common(True, [], args=args, should_renew=True, reuse_key=True)
 
     # Should be moved to renewal_test.py
     @mock.patch('sys.stdin')
@@ -1149,13 +1137,6 @@ class MainTest(test_util.ConfigTestCase):  # pylint: disable=too-many-public-met
                                                  should_renew=True, quiet_mode=True)
         out = stdout.getvalue()
         self.assertEqual("", out)
-
-    # Should be moved to renewal_test.py
-    def test_renew_hook_validation(self):
-        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
-        args = ["renew", "--dry-run", "--post-hook=no-such-command"]
-        self._test_renewal_common(True, [], args=args, should_renew=False,
-                                  error_expected=True)
 
     # Should be moved to renewal_test.py
     def test_renew_verb_empty_config(self):
@@ -1271,13 +1252,6 @@ class MainTest(test_util.ConfigTestCase):  # pylint: disable=too-many-public-met
                 mock_renew_cert.side_effect = Exception
                 self._test_renewal_common(True, None, error_expected=True,
                                           args=['renew'], should_renew=False)
-
-    # Should be moved to renewal_test.py
-    def test_renew_with_bad_cli_args(self):
-        self._test_renewal_common(True, None, args='renew -d example.com'.split(),
-                                  should_renew=False, error_expected=True)
-        self._test_renewal_common(True, None, args='renew --csr {0}'.format(CSR).split(),
-                                  should_renew=False, error_expected=True)
 
     # Should be moved to renewal_test.py
     def test_no_renewal_with_hooks(self):
