@@ -173,6 +173,9 @@ class RenewalTest(test_util.ConfigTestCase):
         return mock_lineage, mock_get_utility, stdout
 
     def test_renew_with_bad_certname(self):
+        """Test renewal with a bad certificate name.
+       Asserts that "should_renew" is false when running with a bad certname.
+       """
         self._test_renewal_common(True, [], should_renew=False,
                                   args=['renew', '--dry-run', '--cert-name', 'sample-renewal'],
                                   error_expected=True)
