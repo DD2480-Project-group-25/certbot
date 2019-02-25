@@ -175,6 +175,9 @@ class RenewalTest(test_util.ConfigTestCase):
                                   error_expected=True)
 
     def test_renew_with_certname(self):
+        """Test renewal with a certificate name.
+	    Asserts that "should_renew" is true when running with this certname.
+	    """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         self._test_renewal_common(True, [], should_renew=True,
                                   args=['renew', '--dry-run', '--cert-name', 'sample-renewal'])
