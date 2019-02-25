@@ -37,6 +37,9 @@ class RenewalTest(test_util.ConfigTestCase):
                 print(lf.read())
 
     def test_reuse_key(self):
+        """Test renewal with reuse_key flag.
+	    Asserts that renewal should happen when reusing key.
+	    """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "--reuse-key"]
         self._test_renewal_common(True, [], args=args, should_renew=True, reuse_key=True)
