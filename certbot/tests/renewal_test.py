@@ -244,6 +244,9 @@ class RenewalTest(test_util.ConfigTestCase):
 
     @test_util.broken_on_windows
     def test_renew(self):
+        """Test renewal with dry-run flag.
+        Assert that the word ''renew'' is printed to standard output.
+        """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run"]
         _, _, stdout = self._test_renewal_common(True, [], args=args, should_renew=True)
