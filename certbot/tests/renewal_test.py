@@ -259,6 +259,16 @@ class RenewalTest(test_util.ConfigTestCase):
         out = stdout.getvalue()
         self.assertEqual("", out)
 
+    @mock.patch('certbot.crypto_util.notAfter')
+    def test_certonly_renewal(self, unused_notafter):
+        lineage, get_utility, _ = self._test_renewal_common(True, [])
+        self.assertEqual(lineage.save_successor.call_count, 1)
+        lineage.update_all_links_to.assert_called_once_with(
+            lineage.latest_common_version())
+        cert_msg = get_utility().add_message.call_args_list[0][0][0]
+        self.assertTrue('fullchain.pem' in cert_msg)
+        self.assertTrue('donate' in get_utility().add_message.call_args[0][0])
+
 
 class RestoreRequiredConfigElementsTest(test_util.ConfigTestCase):
     """Tests for certbot.renewal.restore_required_config_elements."""
