@@ -214,6 +214,10 @@ class RenewalTest(test_util.ConfigTestCase):
                                   should_renew=False, error_expected=True)
 
     def test_renew_bad_cli_args_with_format(self):
+        """Test renewal with bad args.
+	    Asserts that if args is given as a formatted list of strings,
+	    should_renew is false.
+	    """
         self._test_renewal_common(True, None, args='renew --csr {0}'.format(CSR).split(),
                                   should_renew=False, error_expected=True)
 
