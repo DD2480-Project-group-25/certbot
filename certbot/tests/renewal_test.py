@@ -206,6 +206,10 @@ class RenewalTest(test_util.ConfigTestCase):
                                   error_expected=True)
 
     def test_renew_bad_cli_args_with_split(self):
+        """Test renewal with bad args.
+	    Asserts that if args is given as a list of strings,
+	    should_renew is false.
+	    """
         self._test_renewal_common(True, None, args='renew -d example.com'.split(),
                                   should_renew=False, error_expected=True)
 
