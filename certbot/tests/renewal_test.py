@@ -255,6 +255,9 @@ class RenewalTest(test_util.ConfigTestCase):
 
     @test_util.broken_on_windows
     def test_quiet_renew(self):
+        """Test renewal with dry-run flag in quite mode.
+        Assert that nothing is printed to standard output when running with quite-flag.
+        """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "-q"]
         _, _, stdout = self._test_renewal_common(True, [], args=args,
