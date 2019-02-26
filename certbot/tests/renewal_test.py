@@ -261,6 +261,9 @@ class RenewalTest(test_util.ConfigTestCase):
 
     @mock.patch('sys.stdin')
     def test_interactive_no_renewal_delay(self, stdin):
+        """Test that renewal without delay works in interactive mode with dry-run option.
+        Runs the renewal test and asserts that no sleep has been invoked during renewal process.
+        """
         stdin.isatty.return_value = True
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "-tvv"]
