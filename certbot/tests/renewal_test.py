@@ -167,6 +167,8 @@ class RenewalTest(test_util.ConfigTestCase):
         # --dry-run should force renewal
         _, get_utility, _ = self._test_renewal_common(False, ['--dry-run', '--keep'],
                                                       log_out="simulating renewal")
+        self._test_renewal_common(False, ['--renew-by-default', '-tvv', '--debug'],
+                                  log_out="Auto-renewal forced")
         self.assertEqual(get_utility().add_message.call_count, 1)
 
     @test_util.broken_on_windows
