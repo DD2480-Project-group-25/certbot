@@ -177,6 +177,28 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
         os.makedirs(renewer_configs_dir)
         with open(os.path.join(renewer_configs_dir, 'test.conf'), 'w') as f:
             f.write("My contents don't matter")
+
+    def _test_renew_common(self, renewalparams=None, names=None,
+                           assert_oc_called=None, **kwargs):
+        self._make_dummy_renewal_config()
+        with mock.patch('certbot.storage.RenewableCert') as mock_rc:
+            mock_lineage = mock.MagicMock()
+            mock_lineage.fullchain = "somepath/fullchain.pem"
+            if renewalparams is not None:
+                mock_lineage.configuration = {'renewalparams': renewalparams}
+            if names is not None:
+                mock_lineage.names.return_value = names
+            mock_rc.return_value = mock_lineage
+            with mock.patch('certbot.main.renew_cert') as mock_renew_cert:
+                kwargs.setdefault('args', ['renew'])
+                self._test_renewal_common(True, None, should_renew=False, **kwargs)
+
+            if assert_oc_called is not None:
+                if assert_oc_called:
+                    self.assertTrue(mock_renew_cert.called)
+                else:
+                    self.assertFalse(mock_renew_cert.called)
+
     def test_renew_with_bad_certname(self):
         self._test_renewal_common(True, [], should_renew=False,
                                   args=['renew', '--dry-run', '--cert-name', 'sample-renewal'],
