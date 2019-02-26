@@ -189,6 +189,9 @@ class RenewalTest(test_util.ConfigTestCase):
                                   args=['renew', '--dry-run', '--cert-name', 'sample-renewal'])
 
     def test_renew_verb(self):
+        """Test renewal with verbose output
+        Asserts that renewal of cert is successful
+        """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "-tvv"]
         self._test_renewal_common(True, [], args=args, should_renew=True)
