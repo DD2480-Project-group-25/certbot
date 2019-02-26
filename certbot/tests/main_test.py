@@ -1046,21 +1046,15 @@ class MainTest(test_util.ConfigTestCase):  # pylint: disable=too-many-public-met
         return mock_lineage, mock_get_utility, stdout
 
     # Should be moved to renewal_test.py
-    @test_util.broken_on_windows
     @mock.patch('certbot.crypto_util.notAfter')
-    def test_certonly_renewal_triggers(self, unused_notafter):
-        # --dry-run should force renewal
-        _, get_utility, _ = self._test_renewal_common(False, ['--dry-run', '--keep'],
-                                                      log_out="simulating renewal")
-        self.assertEqual(get_utility().add_message.call_count, 1)
-        self.assertTrue('dry run' in get_utility().add_message.call_args[0][0])
-
-        self._test_renewal_common(False, ['--renew-by-default', '-tvv', '--debug'],
-                                  log_out="Auto-renewal forced")
-        self.assertEqual(get_utility().add_message.call_count, 1)
-
-        self._test_renewal_common(False, ['-tvv', '--debug', '--keep'],
-                                  log_out="not yet due", should_renew=False)
+    def test_certonly_renewal(self, unused_notafter):
+        lineage, get_utility, _ = self._test_renewal_common(True, [])
+        self.assertEqual(lineage.save_successor.call_count, 1)
+        lineage.update_all_links_to.assert_called_once_with(
+            lineage.latest_common_version())
+        cert_msg = get_utility().add_message.call_args_list[0][0][0]
+        self.assertTrue('fullchain.pem' in cert_msg)
+        self.assertTrue('donate' in get_utility().add_message.call_args[0][0])
 
     def _dump_log(self):
         print("Logs:")
