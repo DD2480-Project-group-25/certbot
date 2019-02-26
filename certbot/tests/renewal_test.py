@@ -173,7 +173,7 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
                     self.assertTrue(log_out in lf.read())
 
         return mock_lineage, mock_get_utility, stdout
-    
+
     @test_util.broken_on_windows
     @mock.patch('certbot.crypto_util.notAfter')
     def test_certonly_renewal_trigger_callcount(self, unused_notafter):
