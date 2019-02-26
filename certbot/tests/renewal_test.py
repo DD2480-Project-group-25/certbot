@@ -215,6 +215,9 @@ class RenewalTest(test_util.ConfigTestCase):
 
 
     def test_renew_hook_validation(self):
+        """Test renewal with hook "no-such-command"
+        Asserts that no renewal is invoked and that an error occurs.
+        """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "--post-hook=no-such-command"]
         self._test_renewal_common(True, [], args=args, should_renew=False,
