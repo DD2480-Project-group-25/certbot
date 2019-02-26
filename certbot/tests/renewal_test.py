@@ -1,11 +1,14 @@
+# coding=utf-8
 """Tests for certbot.renewal"""
 from __future__ import print_function
 
 import mock
 import unittest
 import datetime
+import json
 import os
 import six
+import tempfile
 import traceback
 
 from acme import challenges
