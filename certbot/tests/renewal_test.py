@@ -341,6 +341,30 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
             mock_reconstitute.side_effect = Exception
             self._test_renew_common(assert_oc_called=False, error_expected=True)
 
+    @mock.patch('certbot.renewal.should_renew')
+    def test_renew_skips_recent_certs(self, should_renew):
+        should_renew.return_value = False
+        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
+        expiry = datetime.datetime.now() + datetime.timedelta(days=90)
+        _, _, stdout = self._test_renewal_common(False, extra_args=None, should_renew=False,
+                                                 args=['renew'], expiry_date=expiry)
+        self.assertTrue('No renewals were attempted.' in stdout.getvalue())
+        self.assertTrue('The following certs are not due for renewal yet:' in stdout.getvalue())
+
+    def test_certonly_renewal_lineage(self):
+        lineage, _, _ = self._test_renewal_common(True, [])
+        self.assertEqual(lineage.save_successor.call_count, 1)
+        lineage.update_all_links_to.assert_called_once_with(
+            lineage.latest_common_version())
+
+    @mock.patch('certbot.crypto_util.notAfter')
+    def test_certonly_renewal_get_utillity(self, unused_notafter):
+        _, get_utility, _ = self._test_renewal_common(True, [])
+
+        cert_msg = get_utility().add_message.call_args_list[0][0][0]
+        self.assertTrue('fullchain.pem' in cert_msg)
+        self.assertTrue('donate' in get_utility().add_message.call_args[0][0])
+
 
 class RestoreRequiredConfigElementsTest(test_util.ConfigTestCase):
     """Tests for certbot.renewal.restore_required_config_elements."""
