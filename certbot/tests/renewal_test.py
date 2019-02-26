@@ -172,6 +172,11 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
 
         return mock_lineage, mock_get_utility, stdout
 
+    def _make_dummy_renewal_config(self):
+        renewer_configs_dir = os.path.join(self.config.config_dir, 'renewal')
+        os.makedirs(renewer_configs_dir)
+        with open(os.path.join(renewer_configs_dir, 'test.conf'), 'w') as f:
+            f.write("My contents don't matter")
     def test_renew_with_bad_certname(self):
         self._test_renewal_common(True, [], should_renew=False,
                                   args=['renew', '--dry-run', '--cert-name', 'sample-renewal'],
