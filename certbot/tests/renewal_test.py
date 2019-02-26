@@ -231,6 +231,10 @@ class RenewalTest(test_util.ConfigTestCase):
                                   should_renew=False, error_expected=True)
 
     def test_renew_verb_empty_config(self):
+        """Tests to run renewal without configuration.
+        Runs renewal process with an empty file.
+        Asserts that renewal is not invoked and that an error occurs.
+        """
         rd = os.path.join(self.config.config_dir, 'renewal')
         if not os.path.exists(rd):
             os.makedirs(rd)
