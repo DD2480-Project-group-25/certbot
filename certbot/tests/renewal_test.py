@@ -23,7 +23,7 @@ import certbot.tests.util as test_util
 CSR = test_util.vector_path('csr_512.der')
 
 
-class RenewalTest(test_util.ConfigTestCase):
+class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-methods
     def setUp(self):
         super(RenewalTest, self).setUp()
         self.standard_args = ['--config-dir', self.config.config_dir,
