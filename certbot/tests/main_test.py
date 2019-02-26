@@ -4,7 +4,6 @@
 from __future__ import print_function
 
 import itertools
-import json
 import mock
 import os
 import shutil
@@ -12,7 +11,6 @@ import traceback
 import unittest
 import datetime
 import pytz
-import tempfile
 import sys
 
 import josepy as jose
