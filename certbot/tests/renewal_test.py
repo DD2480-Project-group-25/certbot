@@ -198,6 +198,9 @@ class RenewalTest(test_util.ConfigTestCase):
 
     @mock.patch('certbot.hooks.post_hook')
     def test_renew_no_hook_validation(self, unused_post_hook):
+        """Test renewal with disabled hook validation
+        Asserts that renewal of cert is successful and that no error occurs.
+        """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "--post-hook=no-such-command",
                 "--disable-hook-validation"]
