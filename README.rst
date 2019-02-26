@@ -1,4 +1,18 @@
 .. This file contains a series of comments that are used to include sections of this README in other files. Do not modify these comments unless you know what you are doing. tag:intro-begin
+Patch
+------------
+Look at pull-request #40 to see a demonstration of our patch.
+
+Statement of contributions
+------------
+Alzahraa Salman:
+Helena Alinder:
+Jesper Larsson:
+Marcus Granström:
+Veronica Hage:
+
+Beginning of certbots official readme
+------------
 
 Certbot is part of EFF’s effort to encrypt the entire Internet. Secure communication over the Web relies on HTTPS, which requires the use of a digital certificate that lets browsers verify the identity of web servers (e.g., is that really google.com?). Web servers obtain their certificates from trusted third parties called certificate authorities (CAs). Certbot is an easy-to-use client that fetches a certificate from Let’s Encrypt—an open certificate authority launched by the EFF, Mozilla, and others—and deploys it to a web server.
 
