@@ -1069,12 +1069,6 @@ class MainTest(test_util.ConfigTestCase):  # pylint: disable=too-many-public-met
             with open(log_path) as lf:
                 print(lf.read())
 
-    def _make_dummy_renewal_config(self):
-        renewer_configs_dir = os.path.join(self.config.config_dir, 'renewal')
-        os.makedirs(renewer_configs_dir)
-        with open(os.path.join(renewer_configs_dir, 'test.conf'), 'w') as f:
-            f.write("My contents don't matter")
-
     @test_util.patch_get_utility()
     @mock.patch('certbot.main._find_lineage_for_domains_and_certname')
     @mock.patch('certbot.main._init_le_client')
