@@ -7,7 +7,6 @@ import itertools
 import mock
 import os
 import shutil
-import traceback
 import unittest
 import datetime
 import pytz
