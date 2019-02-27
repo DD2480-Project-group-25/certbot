@@ -3,10 +3,6 @@ Patch
 ------------
 Look at pull-request #40 to see a demonstration of our patch.
 
-Report
-------------
-Read the report for this assignment `here <https://github.com/DD2480-Project-group-25/certbot/blob/refactor/report.pdf>`_
-
 Statement of contributions
 ------------
 Alzahraa Salman:
