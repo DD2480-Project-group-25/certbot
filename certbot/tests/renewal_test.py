@@ -450,6 +450,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
         self.assertTrue('donate' in get_utility().add_message.call_args[0][0])
 
     def test_no_renewal_with_hooks(self):
+        """
+        Test that hooks do not run if the certs are not renewed.
+        """
         _, _, stdout = self._test_renewal_common(
             due_for_renewal=False, extra_args=None, should_renew=False,
             args=['renew', '--post-hook',
