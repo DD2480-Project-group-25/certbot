@@ -199,7 +199,7 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
     @test_util.broken_on_windows
     @mock.patch('certbot.crypto_util.notAfter')
     def test_certonly_negative_renewal(self, unused_notafter):
-        """Testing negatie renewal trigger, should not renew."""
+        """Testing negative renewal trigger, should not renew."""
 
         self._test_renewal_common(False, ['-tvv', '--debug', '--keep'],
                                   log_out="not yet due", should_renew=False)
