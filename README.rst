@@ -3,15 +3,39 @@ Patch
 ------------
 Look at pull-request #40 to see a demonstration of our patch.
 
+Report
+------------
+Read the report for this assignment `here <https://github.com/DD2480-Project-group-25/certbot/blob/refactor/report.pdf>`_
+
 Statement of contributions
 ------------
 Alzahraa Salman:
-Helena Alinder:
-Jesper Larsson:
-Marcus Granström:
-Veronica Hage:
+Refactored:
+test_renew_verb_empty_config, test_renew_with_bad_certname, test_renew_with_certname, test_renew_with_bad_cli_args, test_reuse_key.
+Configuration of project and written report.
 
-Beginning of certbots official readme
+Helena Alinder:
+Refactored:
+test_renew_no_hook_validation, test_renew_hook_validation, test_renew_verb.
+Configuration and written report.
+
+Jesper Larsson:
+Refactored:
+test_no_renewal_with_hooks, test_renew_skips_recent_certs, test_certonly_renewal.
+Initial configuration.
+
+Marcus Granström:
+Refactored: 
+test_noninteractive_renewal_delay, test_interactive_no_renewal_delay, test_renew_verb_empty_config, test_quiet_renew, test_reuse_key_no_dry_run.
+Configuration. Moved test_renew_common and updated CHANGELOG.
+
+Veronica Hage:
+Refactored:
+test_renew_obtain_cert_error,
+test_certonly_renewal_triggers.
+Configuration.
+
+Beginning of certbots official README
 ------------
 
 Certbot is part of EFF’s effort to encrypt the entire Internet. Secure communication over the Web relies on HTTPS, which requires the use of a digital certificate that lets browsers verify the identity of web servers (e.g., is that really google.com?). Web servers obtain their certificates from trusted third parties called certificate authorities (CAs). Certbot is an easy-to-use client that fetches a certificate from Let’s Encrypt—an open certificate authority launched by the EFF, Mozilla, and others—and deploys it to a web server.
