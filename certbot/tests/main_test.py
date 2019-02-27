@@ -1045,17 +1045,6 @@ class MainTest(test_util.ConfigTestCase):  # pylint: disable=too-many-public-met
 
         return mock_lineage, mock_get_utility, stdout
 
-    # Should be moved to renewal_test.py
-    @mock.patch('certbot.crypto_util.notAfter')
-    def test_certonly_renewal(self, unused_notafter):
-        lineage, get_utility, _ = self._test_renewal_common(True, [])
-        self.assertEqual(lineage.save_successor.call_count, 1)
-        lineage.update_all_links_to.assert_called_once_with(
-            lineage.latest_common_version())
-        cert_msg = get_utility().add_message.call_args_list[0][0][0]
-        self.assertTrue('fullchain.pem' in cert_msg)
-        self.assertTrue('donate' in get_utility().add_message.call_args[0][0])
-
     def _dump_log(self):
         print("Logs:")
         log_path = os.path.join(self.config.logs_dir, "letsencrypt.log")
