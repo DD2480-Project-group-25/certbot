@@ -439,6 +439,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
         self.assertTrue('The following certs are not due for renewal yet:' in stdout.getvalue())
 
     def test_certonly_renewal_lineage(self):
+        """
+        Test that cert lineage is correct after renewal.
+        """
         lineage, _, _ = self._test_renewal_common(True, [])
         self.assertEqual(lineage.save_successor.call_count, 1)
         lineage.update_all_links_to.assert_called_once_with(
@@ -446,6 +449,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
 
     @mock.patch('certbot.crypto_util.notAfter')
     def test_certonly_renewal_get_utillity(self, unused_notafter):
+        """
+        Test that cert message is proper after cert renewal.
+        """
         _, get_utility, _ = self._test_renewal_common(True, [])
 
         cert_msg = get_utility().add_message.call_args_list[0][0][0]
