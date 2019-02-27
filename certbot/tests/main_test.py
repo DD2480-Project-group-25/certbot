@@ -4,7 +4,6 @@
 from __future__ import print_function
 
 import itertools
-import json
 import mock
 import os
 import shutil
@@ -12,8 +11,6 @@ import traceback
 import unittest
 import datetime
 import pytz
-import tempfile
-import sys
 
 import josepy as jose
 import six
@@ -1059,142 +1056,12 @@ class MainTest(test_util.ConfigTestCase):  # pylint: disable=too-many-public-met
         self.assertTrue('fullchain.pem' in cert_msg)
         self.assertTrue('donate' in get_utility().add_message.call_args[0][0])
 
-    # Should be moved to renewal_test.py
-    @test_util.broken_on_windows
-    @mock.patch('certbot.crypto_util.notAfter')
-    def test_certonly_renewal_triggers(self, unused_notafter):
-        # --dry-run should force renewal
-        _, get_utility, _ = self._test_renewal_common(False, ['--dry-run', '--keep'],
-                                                      log_out="simulating renewal")
-        self.assertEqual(get_utility().add_message.call_count, 1)
-        self.assertTrue('dry run' in get_utility().add_message.call_args[0][0])
-
-        self._test_renewal_common(False, ['--renew-by-default', '-tvv', '--debug'],
-                                  log_out="Auto-renewal forced")
-        self.assertEqual(get_utility().add_message.call_count, 1)
-
-        self._test_renewal_common(False, ['-tvv', '--debug', '--keep'],
-                                  log_out="not yet due", should_renew=False)
-
     def _dump_log(self):
         print("Logs:")
         log_path = os.path.join(self.config.logs_dir, "letsencrypt.log")
         if os.path.exists(log_path):
             with open(log_path) as lf:
                 print(lf.read())
-
-    # Should be moved to renewal_test.py
-    @mock.patch('certbot.renewal.should_renew')
-    def test_renew_skips_recent_certs(self, should_renew):
-        should_renew.return_value = False
-        test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
-        expiry = datetime.datetime.now() + datetime.timedelta(days=90)
-        _, _, stdout = self._test_renewal_common(False, extra_args=None, should_renew=False,
-                                                 args=['renew'], expiry_date=expiry)
-        self.assertTrue('No renewals were attempted.' in stdout.getvalue())
-        self.assertTrue('The following certs are not due for renewal yet:' in stdout.getvalue())
-
-    def _make_dummy_renewal_config(self):
-        renewer_configs_dir = os.path.join(self.config.config_dir, 'renewal')
-        os.makedirs(renewer_configs_dir)
-        with open(os.path.join(renewer_configs_dir, 'test.conf'), 'w') as f:
-            f.write("My contents don't matter")
-
-    def _test_renew_common(self, renewalparams=None, names=None,
-                           assert_oc_called=None, **kwargs):
-        self._make_dummy_renewal_config()
-        with mock.patch('certbot.storage.RenewableCert') as mock_rc:
-            mock_lineage = mock.MagicMock()
-            mock_lineage.fullchain = "somepath/fullchain.pem"
-            if renewalparams is not None:
-                mock_lineage.configuration = {'renewalparams': renewalparams}
-            if names is not None:
-                mock_lineage.names.return_value = names
-            mock_rc.return_value = mock_lineage
-            with mock.patch('certbot.main.renew_cert') as mock_renew_cert:
-                kwargs.setdefault('args', ['renew'])
-                self._test_renewal_common(True, None, should_renew=False, **kwargs)
-
-            if assert_oc_called is not None:
-                if assert_oc_called:
-                    self.assertTrue(mock_renew_cert.called)
-                else:
-                    self.assertFalse(mock_renew_cert.called)
-
-    def test_renew_no_renewalparams(self):
-        self._test_renew_common(assert_oc_called=False, error_expected=True)
-
-    def test_renew_no_authenticator(self):
-        self._test_renew_common(renewalparams={}, assert_oc_called=False,
-            error_expected=True)
-
-    def test_renew_with_bad_int(self):
-        renewalparams = {'authenticator': 'webroot',
-                         'rsa_key_size': 'over 9000'}
-        self._test_renew_common(renewalparams=renewalparams, error_expected=True,
-                                assert_oc_called=False)
-
-    def test_renew_with_nonetype_http01(self):
-        renewalparams = {'authenticator': 'webroot',
-                         'http01_port': 'None'}
-        self._test_renew_common(renewalparams=renewalparams,
-                                assert_oc_called=True)
-
-    def test_renew_with_bad_domain(self):
-        renewalparams = {'authenticator': 'webroot'}
-        names = ['uniçodé.com']
-        self._test_renew_common(renewalparams=renewalparams, error_expected=True,
-                                names=names, assert_oc_called=False)
-
-    @mock.patch('certbot.plugins.selection.choose_configurator_plugins')
-    def test_renew_with_configurator(self, mock_sel):
-        mock_sel.return_value = (mock.MagicMock(), mock.MagicMock())
-        renewalparams = {'authenticator': 'webroot'}
-        self._test_renew_common(
-            renewalparams=renewalparams, assert_oc_called=True,
-            args='renew --configurator apache'.split())
-
-    def test_renew_plugin_config_restoration(self):
-        renewalparams = {'authenticator': 'webroot',
-                         'webroot_path': 'None',
-                         'webroot_imaginary_flag': '42'}
-        self._test_renew_common(renewalparams=renewalparams,
-                                assert_oc_called=True)
-
-    def test_renew_with_webroot_map(self):
-        renewalparams = {'authenticator': 'webroot'}
-        self._test_renew_common(
-            renewalparams=renewalparams, assert_oc_called=True,
-            args=['renew', '--webroot-map', json.dumps({'example.com': tempfile.gettempdir()})])
-
-    def test_renew_reconstitute_error(self):
-        # pylint: disable=protected-access
-        with mock.patch('certbot.main.renewal._reconstitute') as mock_reconstitute:
-            mock_reconstitute.side_effect = Exception
-            self._test_renew_common(assert_oc_called=False, error_expected=True)
-
-    # Should be moved to renewal_test.py
-    def test_renew_obtain_cert_error(self):
-        self._make_dummy_renewal_config()
-        with mock.patch('certbot.storage.RenewableCert') as mock_rc:
-            mock_lineage = mock.MagicMock()
-            mock_lineage.fullchain = "somewhere/fullchain.pem"
-            mock_rc.return_value = mock_lineage
-            mock_lineage.configuration = {
-                'renewalparams': {'authenticator': 'webroot'}}
-            with mock.patch('certbot.main.renew_cert') as mock_renew_cert:
-                mock_renew_cert.side_effect = Exception
-                self._test_renewal_common(True, None, error_expected=True,
-                                          args=['renew'], should_renew=False)
-
-    # Should be moved to renewal_test.py
-    def test_no_renewal_with_hooks(self):
-        _, _, stdout = self._test_renewal_common(
-            due_for_renewal=False, extra_args=None, should_renew=False,
-            args=['renew', '--post-hook',
-                  '{0} -c "from __future__ import print_function; print(\'hello world\');"'
-                  .format(sys.executable)])
-        self.assertTrue('No hooks were run.' in stdout.getvalue())
 
     @test_util.patch_get_utility()
     @mock.patch('certbot.main._find_lineage_for_domains_and_certname')
