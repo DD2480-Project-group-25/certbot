@@ -180,6 +180,7 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
     @test_util.broken_on_windows
     @mock.patch('certbot.crypto_util.notAfter')
     def test_certonly_renewal_trigger_callcount(self, unused_notafter):
+        """Checks that mock object is called when --dry-run forced renewal is triggered."""
         # --dry-run should force renewal
         _, get_utility, _ = self._test_renewal_common(False, ['--dry-run', '--keep'],
                                                       log_out="simulating renewal")
@@ -190,6 +191,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
     @test_util.broken_on_windows
     @mock.patch('certbot.crypto_util.notAfter')
     def test_certonly_renewal_trigger_dryrun_message(self, unused_notafter):
+        """Checks that "dry run" message is added in mock object's args list when --dry-run
+        renewal is triggered.
+        """
         # --dry-run should force renewal
         _, get_utility, _ = self._test_renewal_common(False, ['--dry-run', '--keep'],
                                                       log_out="simulating renewal")
@@ -203,6 +207,7 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
 
         self._test_renewal_common(False, ['-tvv', '--debug', '--keep'],
                                   log_out="not yet due", should_renew=False)
+
     def _make_dummy_renewal_config(self):
         renewer_configs_dir = os.path.join(self.config.config_dir, 'renewal')
         os.makedirs(renewer_configs_dir)
@@ -311,6 +316,8 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
         self._test_renewal_common(False, [], args=args, should_renew=False, error_expected=True)
 
     def test_renew_obtain_cert_error(self):
+        """Tests that faulty certificate is not renewed.
+        """
         self._make_dummy_renewal_config()
         with mock.patch('certbot.storage.RenewableCert') as mock_rc:
             mock_lineage = mock.MagicMock()
