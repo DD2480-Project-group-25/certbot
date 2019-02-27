@@ -427,6 +427,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
 
     @mock.patch('certbot.renewal.should_renew')
     def test_renew_skips_recent_certs(self, should_renew):
+        """
+        Test that renewal is skipped if certs were recently issued.
+        """
         should_renew.return_value = False
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         expiry = datetime.datetime.now() + datetime.timedelta(days=90)
