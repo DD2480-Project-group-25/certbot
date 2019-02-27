@@ -42,6 +42,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
                 print(lf.read())
 
     def test_reuse_key(self):
+        """Test renewal with reuse_key flag.
+	    Asserts that renewal should happen when reusing key.
+	    """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "--reuse-key"]
         self._test_renewal_common(True, [], args=args, should_renew=True, reuse_key=True)
@@ -177,6 +180,7 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
     @test_util.broken_on_windows
     @mock.patch('certbot.crypto_util.notAfter')
     def test_certonly_renewal_trigger_callcount(self, unused_notafter):
+        """Checks that mock object is called when --dry-run forced renewal is triggered."""
         # --dry-run should force renewal
         _, get_utility, _ = self._test_renewal_common(False, ['--dry-run', '--keep'],
                                                       log_out="simulating renewal")
@@ -187,6 +191,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
     @test_util.broken_on_windows
     @mock.patch('certbot.crypto_util.notAfter')
     def test_certonly_renewal_trigger_dryrun_message(self, unused_notafter):
+        """Checks that "dry run" message is added in mock object's args list when --dry-run
+        renewal is triggered.
+        """
         # --dry-run should force renewal
         _, get_utility, _ = self._test_renewal_common(False, ['--dry-run', '--keep'],
                                                       log_out="simulating renewal")
@@ -196,10 +203,11 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
     @test_util.broken_on_windows
     @mock.patch('certbot.crypto_util.notAfter')
     def test_certonly_negative_renewal(self, unused_notafter):
-        """Testing negatie renewal trigger, should not renew."""
+        """Testing negative renewal trigger, should not renew."""
 
         self._test_renewal_common(False, ['-tvv', '--debug', '--keep'],
                                   log_out="not yet due", should_renew=False)
+
     def _make_dummy_renewal_config(self):
         renewer_configs_dir = os.path.join(self.config.config_dir, 'renewal')
         os.makedirs(renewer_configs_dir)
@@ -228,22 +236,34 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
                     self.assertFalse(mock_renew_cert.called)
 
     def test_renew_with_bad_certname(self):
+        """Test renewal with a bad certificate name.
+       Asserts that "should_renew" is false when running with a bad certname.
+       """
         self._test_renewal_common(True, [], should_renew=False,
                                   args=['renew', '--dry-run', '--cert-name', 'sample-renewal'],
                                   error_expected=True)
 
     def test_renew_with_certname(self):
+        """Test renewal with a certificate name.
+	    Asserts that "should_renew" is true when running with this certname.
+	    """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         self._test_renewal_common(True, [], should_renew=True,
                                   args=['renew', '--dry-run', '--cert-name', 'sample-renewal'])
 
     def test_renew_verb(self):
+        """Test renewal with verbose output
+        Asserts that renewal of cert is successful
+        """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "-tvv"]
         self._test_renewal_common(True, [], args=args, should_renew=True)
 
     @mock.patch('certbot.hooks.post_hook')
     def test_renew_no_hook_validation(self, unused_post_hook):
+        """Test renewal with disabled hook validation
+        Asserts that renewal of cert is successful and that no error occurs.
+        """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "--post-hook=no-such-command",
                 "--disable-hook-validation"]
@@ -258,20 +278,35 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
 
 
     def test_renew_hook_validation(self):
+        """Test renewal with hook "no-such-command"
+        Asserts that no renewal is invoked and that an error occurs.
+        """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "--post-hook=no-such-command"]
         self._test_renewal_common(True, [], args=args, should_renew=False,
                                   error_expected=True)
 
     def test_renew_bad_cli_args_with_split(self):
+        """Test renewal with bad args.
+	    Asserts that if args is given as a list of strings,
+	    should_renew is false.
+	    """
         self._test_renewal_common(True, None, args='renew -d example.com'.split(),
                                   should_renew=False, error_expected=True)
 
     def test_renew_bad_cli_args_with_format(self):
+        """Test renewal with bad args.
+	    Asserts that if args is given as a formatted list of strings,
+	    should_renew is false.
+	    """
         self._test_renewal_common(True, None, args='renew --csr {0}'.format(CSR).split(),
                                   should_renew=False, error_expected=True)
 
     def test_renew_verb_empty_config(self):
+        """Tests to run renewal without configuration.
+        Runs renewal process with an empty file.
+        Asserts that renewal is not invoked and that an error occurs.
+        """
         rd = os.path.join(self.config.config_dir, 'renewal')
         if not os.path.exists(rd):
             os.makedirs(rd)
@@ -281,6 +316,8 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
         self._test_renewal_common(False, [], args=args, should_renew=False, error_expected=True)
 
     def test_renew_obtain_cert_error(self):
+        """Tests that faulty certificate is not renewed.
+        """
         self._make_dummy_renewal_config()
         with mock.patch('certbot.storage.RenewableCert') as mock_rc:
             mock_lineage = mock.MagicMock()
@@ -295,6 +332,10 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
 
     @mock.patch('sys.stdin')
     def test_noninteractive_renewal_delay(self, stdin):
+        """Test that non-interactive renewal in dry-run mode works with a random delay.
+        Asserts that the renewal was successful and that sleep has been called once
+        with a random sleep delay.
+        """
         stdin.isatty.return_value = False
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "-tvv"]
@@ -307,6 +348,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
 
     @mock.patch('sys.stdin')
     def test_interactive_no_renewal_delay(self, stdin):
+        """Test that renewal without delay works in interactive mode with dry-run option.
+        Runs the renewal test and asserts that no sleep has been invoked during renewal process.
+        """
         stdin.isatty.return_value = True
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "-tvv"]
@@ -315,6 +359,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
 
     @test_util.broken_on_windows
     def test_renew(self):
+        """Test renewal with dry-run flag.
+        Assert that the word ''renew'' is printed to standard output.
+        """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run"]
         _, _, stdout = self._test_renewal_common(True, [], args=args, should_renew=True)
@@ -323,6 +370,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
 
     @test_util.broken_on_windows
     def test_quiet_renew(self):
+        """Test renewal with dry-run flag in quite mode.
+        Assert that nothing is printed to standard output when running with quite-flag.
+        """
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         args = ["renew", "--dry-run", "-q"]
         _, _, stdout = self._test_renewal_common(True, [], args=args,
@@ -384,6 +434,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
 
     @mock.patch('certbot.renewal.should_renew')
     def test_renew_skips_recent_certs(self, should_renew):
+        """
+        Test that renewal is skipped if certs were recently issued.
+        """
         should_renew.return_value = False
         test_util.make_lineage(self.config.config_dir, 'sample-renewal.conf')
         expiry = datetime.datetime.now() + datetime.timedelta(days=90)
@@ -393,6 +446,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
         self.assertTrue('The following certs are not due for renewal yet:' in stdout.getvalue())
 
     def test_certonly_renewal_lineage(self):
+        """
+        Test that cert lineage is correct after renewal.
+        """
         lineage, _, _ = self._test_renewal_common(True, [])
         self.assertEqual(lineage.save_successor.call_count, 1)
         lineage.update_all_links_to.assert_called_once_with(
@@ -400,6 +456,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
 
     @mock.patch('certbot.crypto_util.notAfter')
     def test_certonly_renewal_get_utillity(self, unused_notafter):
+        """
+        Test that cert message is proper after cert renewal.
+        """
         _, get_utility, _ = self._test_renewal_common(True, [])
 
         cert_msg = get_utility().add_message.call_args_list[0][0][0]
@@ -407,6 +466,9 @@ class RenewalTest(test_util.ConfigTestCase): # pylint: disable=too-many-public-m
         self.assertTrue('donate' in get_utility().add_message.call_args[0][0])
 
     def test_no_renewal_with_hooks(self):
+        """
+        Test that hooks do not run if the certs are not renewed.
+        """
         _, _, stdout = self._test_renewal_common(
             due_for_renewal=False, extra_args=None, should_renew=False,
             args=['renew', '--post-hook',
