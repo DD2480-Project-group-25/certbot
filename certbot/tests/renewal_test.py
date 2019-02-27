@@ -11,7 +11,6 @@ import json
 import os
 import six
 import tempfile
-import traceback
 
 from acme import challenges
 
